@@ -1,0 +1,6 @@
+{
+  "name": "QuizSchema - Renderizador Dinâmico de Questões",
+  "description": "Renderizador reativo de questões a partir de JSON com suporte a múltipla escolha, campos de texto, feedback instantâneo e layout fiel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
