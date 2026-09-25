@@ -9,6 +9,7 @@ interface ResultsScreenProps {
   onRestart: () => void;
   onRetakeMissed: () => void;
   onGoToQuestion: (index: number) => void;
+  onOpenShare?: () => void;
 }
 
 export const ResultsScreen: React.FC<ResultsScreenProps> = ({
@@ -17,6 +18,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
   onRestart,
   onRetakeMissed,
   onGoToQuestion,
+  onOpenShare,
 }) => {
   const total = quiz.questions.length;
   let correct = 0;
@@ -127,6 +129,16 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
             {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
             {copied ? 'Copiado!' : 'Copiar Resumo'}
           </button>
+
+          {onOpenShare && (
+            <button
+              onClick={onOpenShare}
+              className="px-4 py-2.5 bg-sky-50 hover:bg-sky-100 text-sky-800 text-sm font-semibold rounded-full flex items-center gap-2 transition-all cursor-pointer active:scale-95 border border-sky-200"
+            >
+              <Share2 className="w-4 h-4" />
+              Compartilhar Quiz
+            </button>
+          )}
         </div>
       </div>
 

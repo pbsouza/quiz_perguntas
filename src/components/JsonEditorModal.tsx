@@ -59,13 +59,13 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
       const parsed = JSON.parse(jsonText);
       const normalized = normalizeQuizJson(parsed, true);
       onApplyQuiz(normalized);
-      setSuccessMsg('Quiz atualizado e perguntas embaralhadas!');
+      setSuccessMsg('Questionário carregado com sucesso!');
       setTimeout(() => {
         setSuccessMsg(null);
         onClose();
       }, 700);
     } catch (err: any) {
-      setErrorMsg(`Erro no JSON: ${err.message}`);
+      setErrorMsg('Não foi possível processar o texto das perguntas. Verifique o formato digitado.');
     }
   };
 
@@ -75,7 +75,7 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
       const formatted = JSON.stringify(found.schema, null, 2);
       setJsonText(formatted);
       setErrorMsg(null);
-      setSuccessMsg(`Preset "${found.name}" carregado!`);
+      setSuccessMsg(`Exemplo "${found.name}" carregado!`);
       setTimeout(() => setSuccessMsg(null), 2000);
     }
   };
@@ -91,10 +91,10 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
         const normalized = normalizeQuizJson(parsed);
         setJsonText(JSON.stringify(normalized, null, 2));
         setErrorMsg(null);
-        setSuccessMsg('Arquivo importado com sucesso!');
+        setSuccessMsg('Arquivo de perguntas importado com sucesso!');
         setTimeout(() => setSuccessMsg(null), 2000);
       } catch (err: any) {
-        setErrorMsg(`Falha ao ler arquivo JSON: ${err.message}`);
+        setErrorMsg('Falha ao abrir arquivo. Certifique-se de que é um arquivo válido de perguntas.');
       }
     };
     reader.readAsText(file);
@@ -102,7 +102,7 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
 
   const handleCopyJson = () => {
     navigator.clipboard.writeText(jsonText);
-    setSuccessMsg('JSON copiado para a área de transferência!');
+    setSuccessMsg('Conteúdo copiado para a área de transferência!');
     setTimeout(() => setSuccessMsg(null), 2000);
   };
 
@@ -165,7 +165,7 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
       setBuilderCorrectText('');
       setBuilderOptions(['', '', '', '']);
       setErrorMsg(null);
-      setSuccessMsg('Pergunta adicionada ao JSON! Clique em "Aplicar Quiz".');
+      setSuccessMsg('Pergunta adicionada! Clique em "Iniciar Questionário" abaixo.');
       setTimeout(() => setSuccessMsg(null), 2500);
       setActiveTab('editor');
     } catch (err: any) {
@@ -185,10 +185,10 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900">
-                Esquema JSON & Questões Dinâmicas
+                Gerenciar Perguntas do Questionário
               </h2>
               <p className="text-xs text-slate-500">
-                Cole seu JSON, edite campos ou monte perguntas reativas
+                Cole o texto das perguntas, monte novas questões ou escolha um exemplo pronto
               </p>
             </div>
           </div>
@@ -211,7 +211,7 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
               }`}
             >
               <Code className="w-3.5 h-3.5" />
-              Editor JSON
+              Editor de Texto
             </button>
             <button
               onClick={() => setActiveTab('builder')}
@@ -220,7 +220,7 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
               }`}
             >
               <PlusCircle className="w-3.5 h-3.5" />
-              Criador Visual
+              Criar Pergunta
             </button>
             <button
               onClick={() => setActiveTab('docs')}
@@ -229,13 +229,13 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              Esquema Suportado
+              Exemplo de Formato
             </button>
           </div>
 
           {/* Quick presets buttons */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500 hidden md:inline">Presets:</span>
+            <span className="text-xs text-slate-500 hidden md:inline">Exemplos Prontos:</span>
             {PRESETS.map(p => (
               <button
                 key={p.id}
@@ -270,14 +270,14 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
           {activeTab === 'editor' && (
             <div className="flex flex-col h-full gap-3">
               <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>Edite ou cole seu arquivo JSON abaixo:</span>
+                <span>Edite ou cole o texto com as perguntas abaixo:</span>
                 <div className="flex items-center gap-2">
                   <label className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg cursor-pointer transition-colors shadow-2xs font-medium">
                     <Upload className="w-3.5 h-3.5" />
-                    Subir .json
+                    Enviar Arquivo
                     <input
                       type="file"
-                      accept=".json"
+                      accept=".json,.txt"
                       onChange={handleFileUpload}
                       className="hidden"
                     />
@@ -294,7 +294,7 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
                     className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg transition-colors shadow-2xs font-medium cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    Baixar
+                    Baixar Arquivo
                   </button>
                 </div>
               </div>
@@ -304,7 +304,7 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
                   value={jsonText}
                   onChange={(e) => handleJsonChange(e.target.value)}
                   spellCheck={false}
-                  placeholder="Cole o JSON de questões aqui..."
+                  placeholder="Cole as perguntas aqui..."
                   className="w-full h-full p-4 font-mono text-xs sm:text-sm text-slate-800 resize-none outline-none leading-relaxed"
                 />
               </div>
@@ -535,7 +535,7 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
             onClick={handleApply}
             className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-full transition-all shadow-xs cursor-pointer active:scale-95"
           >
-            Aplicar Quiz ao App
+            Carregar Questionário
           </button>
         </div>
 

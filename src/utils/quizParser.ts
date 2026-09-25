@@ -43,12 +43,80 @@ export function shuffleArray<T>(array: T[]): T[] {
 }
 
 /**
+ * Shuffles the options of a single question and updates correctOptionIndex / correctOptionIndices
+ */
+export function shuffleQuestionOptions(question: Question): Question {
+  if (!question.options || question.options.length <= 1) {
+    return { ...question };
+  }
+
+  // Create indexed list
+  const indexed = question.options.map((opt, originalIndex) => ({
+    opt,
+    originalIndex,
+  }));
+
+  const shuffled = shuffleArray(indexed);
+  const newOptions = shuffled.map(item => item.opt);
+
+  if (question.type === 'multiple_select' && Array.isArray(question.correctOptionIndices)) {
+    const originalSet = new Set(question.correctOptionIndices);
+    const newCorrectIndices: number[] = [];
+    shuffled.forEach((item, newIndex) => {
+      if (originalSet.has(item.originalIndex)) {
+        newCorrectIndices.push(newIndex);
+      }
+    });
+    return {
+      ...question,
+      options: newOptions,
+      correctOptionIndices: newCorrectIndices.sort((a, b) => a - b),
+    };
+  } else {
+    // multiple_choice
+    const originalCorrect = question.correctOptionIndex ?? 0;
+    const newCorrectIndex = shuffled.findIndex(item => item.originalIndex === originalCorrect);
+
+    return {
+      ...question,
+      options: newOptions,
+      correctOptionIndex: newCorrectIndex !== -1 ? newCorrectIndex : 0,
+    };
+  }
+}
+
+export interface ShuffleConfig {
+  shuffleQuestions?: boolean;
+  shuffleOptions?: boolean;
+}
+
+/**
+ * Shuffles questions order and/or options of each question in a quiz
+ */
+export function shuffleQuiz(quiz: QuizSchema, config: ShuffleConfig = { shuffleQuestions: true, shuffleOptions: true }): QuizSchema {
+  let questions = [...quiz.questions];
+
+  if (config.shuffleOptions) {
+    questions = questions.map(q => shuffleQuestionOptions(q));
+  }
+
+  if (config.shuffleQuestions) {
+    questions = shuffleArray(questions);
+  }
+
+  return {
+    ...quiz,
+    questions,
+  };
+}
+
+/**
  * Normalizes any input JSON into a standardized QuizSchema structure.
  * Cleans text artifacts and tags, and optionally shuffles questions.
  */
 export function normalizeQuizJson(raw: any, shouldShuffle: boolean = false): QuizSchema {
   if (!raw) {
-    throw new Error("JSON vazio ou inválido.");
+    throw new Error("O conteúdo das perguntas está vazio ou não pôde ser lido.");
   }
 
   // If input is an array directly, wrap it in questions
@@ -71,10 +139,10 @@ export function normalizeQuizJson(raw: any, shouldShuffle: boolean = false): Qui
     } else if (Array.isArray(raw.items)) {
       rawQuestions = raw.items;
     } else {
-      throw new Error("Não foi encontrada uma lista de questões (ex: chave 'questions' ou 'questoes').");
+      throw new Error("Não foi encontrada uma lista de perguntas no conteúdo.");
     }
   } else {
-    throw new Error("Formato JSON inválido. Esperado um objeto ou array de questões.");
+    throw new Error("Formato não reconhecido. Certifique-se de colar uma lista de perguntas.");
   }
 
   if (rawQuestions.length === 0) {
