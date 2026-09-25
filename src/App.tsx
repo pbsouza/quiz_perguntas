@@ -219,7 +219,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 sm:bg-slate-100 flex flex-col font-sans text-slate-900 selection:bg-sky-200">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50 sm:bg-slate-100 flex flex-col font-sans text-slate-900 selection:bg-sky-200">
       
       {/* Top Header */}
       <HeaderBar
@@ -243,7 +243,7 @@ export default function App() {
       )}
 
       {/* Main Content Area - Fully fluid and responsive */}
-      <main className="flex-1 flex flex-col items-center justify-start w-full px-0 sm:px-4 md:px-6 sm:py-6">
+      <main className="flex-1 flex flex-col items-center justify-start w-full max-w-full overflow-x-hidden px-0 sm:px-4 md:px-6 sm:py-6">
 
         {!hasQuiz ? (
           /* Clean Empty State with Saved Quizzes Library shortcuts */
@@ -270,13 +270,14 @@ export default function App() {
           </div>
         ) : (
           /* RESPONSIVE QUIZ CONTAINER: Full width on mobile, centered card on tablet & desktop */
-          <div className="w-full max-w-2xl lg:max-w-3xl bg-white sm:rounded-3xl sm:border sm:border-slate-200/90 sm:shadow-xs flex flex-col min-h-[calc(100vh-53px)] sm:min-h-[580px] p-4 sm:p-8 lg:p-10 transition-all">
+          <div className="w-full max-w-2xl lg:max-w-3xl bg-white sm:rounded-3xl sm:border sm:border-slate-200/90 sm:shadow-xs flex flex-col min-h-[calc(100vh-53px)] sm:min-h-[580px] p-3.5 sm:p-8 lg:p-10 transition-all overflow-hidden">
             
             {/* Top Bar with Segmented dashes & score badges */}
             <QuizTopBar
               currentIndex={currentIndex}
               totalQuestions={totalQuestions}
               answers={answers}
+              onEditQuestions={() => setIsJsonModalOpen(true)}
               onShare={() => setIsShareModalOpen(true)}
               onSelectIndex={(idx) => setCurrentIndex(idx)}
             />

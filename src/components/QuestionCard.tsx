@@ -191,12 +191,12 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                   !isAnswered ? 'cursor-pointer active:scale-[0.99] active:bg-[#e2e6ea]' : 'cursor-default'
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-2.5 flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
+                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
                     <span className="font-semibold text-slate-800 text-[15px] shrink-0 pt-0.5">
                       {letter}.
                     </span>
-                    <span className={`text-[15px] leading-normal font-normal ${textColor}`}>
+                    <span className={`text-[15px] leading-normal font-normal ${textColor} break-words min-w-0 flex-1`}>
                       {option}
                     </span>
                     {speechManager.isAvailable() && (
@@ -215,7 +215,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
 
                   {/* Badges row matching screenshot */}
                   {isAnswered && (
-                    <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end pt-0.5">
+                    <div className="flex items-center gap-1.5 shrink-0 flex-wrap sm:justify-end pt-0.5 pl-6 sm:pl-0">
                       {isUserSelection && (
                         <span className="text-xs text-slate-500 font-medium">
                           (Sua resposta)
@@ -223,14 +223,14 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                       )}
 
                       {isCorrectOption && (
-                        <span className="inline-flex items-center gap-1 bg-[#dcfce7] text-[#15803d] text-xs font-semibold px-2.5 py-1 rounded-full shadow-xs">
+                        <span className="inline-flex items-center gap-1 bg-[#dcfce7] text-[#15803d] text-xs font-semibold px-2.5 py-0.5 sm:py-1 rounded-full shadow-xs">
                           <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                           Resposta correta
                         </span>
                       )}
 
                       {isUserSelection && !isCorrectOption && (
-                        <span className="inline-flex items-center gap-1 bg-[#fee2e2] text-[#b91c1c] text-xs font-semibold px-2.5 py-1 rounded-full shadow-xs">
+                        <span className="inline-flex items-center gap-1 bg-[#fee2e2] text-[#b91c1c] text-xs font-semibold px-2.5 py-0.5 sm:py-1 rounded-full shadow-xs">
                           <X className="w-3.5 h-3.5 stroke-[2.5]" />
                           Resposta incorreta
                         </span>
