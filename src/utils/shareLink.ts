@@ -10,6 +10,9 @@ export function generateShareUrl(quiz: QuizSchema): string {
     const minified = {
       title: quiz.title,
       description: quiz.description,
+      videoUrl: quiz.videoUrl,
+      videoTitle: quiz.videoTitle,
+      videoDescription: quiz.videoDescription,
       questions: quiz.questions.map(q => ({
         question: q.question,
         type: q.type,

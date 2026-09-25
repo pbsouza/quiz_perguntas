@@ -3,6 +3,9 @@ import { QuizSchema } from '../types/quiz';
 export const SPANISH_QUIZ_PRESET: QuizSchema = {
   title: "Expressões e Gramática em Espanhol",
   description: "Estudo prático de expressões idiomáticas e preposições em espanhol com explicações detalhadas.",
+  videoUrl: "https://www.youtube.com/watch?v=k1t64lF4-s0",
+  videoTitle: "Vídeo da Aula: Expressões e Vocabulário",
+  videoDescription: "Assista com atenção ao vídeo da lição antes de avançar para a resolução das questões.",
   questions: [
     {
       question: "Na frase em espanhol 'Para sacarle todo el jugo a la lectura de la Biblia', por que usam 'sacarle' junto com a palavra 'a'?",

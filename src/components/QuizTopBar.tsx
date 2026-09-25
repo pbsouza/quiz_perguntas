@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share2, Check, X, FileCode } from 'lucide-react';
+import { Share2, Check, X, FileCode, Video } from 'lucide-react';
 import { QuestionAnswerState } from '../types/quiz';
 
 interface QuizTopBarProps {
@@ -9,6 +9,8 @@ interface QuizTopBarProps {
   onShare?: () => void;
   onEditQuestions?: () => void;
   onSelectIndex?: (index: number) => void;
+  onSwitchToVideo?: () => void;
+  hasVideo?: boolean;
 }
 
 export const QuizTopBar: React.FC<QuizTopBarProps> = ({
@@ -18,6 +20,8 @@ export const QuizTopBar: React.FC<QuizTopBarProps> = ({
   onShare,
   onEditQuestions,
   onSelectIndex,
+  onSwitchToVideo,
+  hasVideo,
 }) => {
   // Calculate correct and wrong counts
   let correctCount = 0;
@@ -64,6 +68,19 @@ export const QuizTopBar: React.FC<QuizTopBarProps> = ({
             <Check className="w-3 h-3 stroke-[2.5]" />
             {correctCount}
           </span>
+
+          {/* Video shortcut if quiz has video */}
+          {hasVideo && onSwitchToVideo && (
+            <button
+              type="button"
+              onClick={onSwitchToVideo}
+              title="Voltar ao vídeo da aula (Parte 1)"
+              className="p-1 sm:px-2.5 sm:py-1 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer border border-indigo-200/80 shrink-0"
+            >
+              <Video className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="hidden xs:inline sm:inline">Vídeo</span>
+            </button>
+          )}
 
           {/* Optional edit shortcut inside topbar */}
           {onEditQuestions && (

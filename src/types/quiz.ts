@@ -20,7 +20,10 @@ export interface QuizSchema {
   title?: string;
   description?: string;
   author?: string;
-  questions: Question[];
+  videoUrl?: string; // YouTube video URL or ID (Parte 1)
+  videoTitle?: string;
+  videoDescription?: string;
+  questions: Question[]; // Perguntas (Parte 2)
 }
 
 export interface QuestionAnswerState {

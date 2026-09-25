@@ -64,7 +64,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onLoadQuiz, onOpenLibrar
             Comece Seu Questionário
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-md mx-auto">
-            Cole as perguntas no campo abaixo, envie um arquivo ou escolha um dos seus questionários salvos.
+            Estrutura em 2 partes: cole o link de um vídeo do YouTube (Parte 1) e as suas perguntas (Parte 2).
           </p>
         </div>
 
@@ -125,7 +125,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onLoadQuiz, onOpenLibrar
               setJsonInput(e.target.value);
               setError(null);
             }}
-            placeholder={`{\n  "questions": [\n    {\n      "question": "Enunciado da pergunta...",\n      "options": [\n        "Alternativa A",\n        "Alternativa B"\n      ],\n      "correctOptionIndex": 0,\n      "explanation": "Explicação..."\n    }\n  ]\n}`}
+            placeholder={`{\n  "title": "Estudo e Questionário",\n  "videoUrl": "https://www.youtube.com/watch?v=...",\n  "questions": [\n    {\n      "question": "Enunciado da pergunta...",\n      "options": [\n        "Alternativa A",\n        "Alternativa B"\n      ],\n      "correctOptionIndex": 0,\n      "explanation": "Explicação..."\n    }\n  ]\n}`}
             rows={8}
             spellCheck={false}
             className="w-full p-4 font-mono text-xs sm:text-sm text-slate-800 bg-[#f8fafc] rounded-2xl border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 focus:bg-white outline-none transition-all resize-y"

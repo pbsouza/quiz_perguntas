@@ -24,12 +24,14 @@ import { JsonEditorModal } from './components/JsonEditorModal';
 import { SavedQuizzesModal } from './components/SavedQuizzesModal';
 import { ShareModal } from './components/ShareModal';
 import { EmptyState } from './components/EmptyState';
+import { VideoPlayerPart } from './components/VideoPlayerPart';
 
 export default function App() {
   const [currentQuiz, setCurrentQuiz] = useState<QuizSchema | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<Record<number, QuestionAnswerState>>({});
   const [showResults, setShowResults] = useState<boolean>(false);
+  const [currentPart, setCurrentPart] = useState<'video' | 'questions'>('video');
   
   // Modals state
   const [isJsonModalOpen, setIsJsonModalOpen] = useState<boolean>(false);
@@ -51,6 +53,8 @@ export default function App() {
       setCurrentIndex(0);
       setAnswers({});
       setShowResults(false);
+      const hasVid = Boolean(randomized.videoUrl && randomized.videoUrl.trim());
+      setCurrentPart(hasVid ? 'video' : 'questions');
       saveQuizToLibrary(randomized);
       setSavedCount(getSavedQuizzes().length);
       setShareToast('Questionário carregado via link compartilhado!');
@@ -65,6 +69,8 @@ export default function App() {
       setCurrentQuiz(session.quiz);
       setCurrentIndex(session.currentIndex || 0);
       setAnswers(session.answers || {});
+      const hasVid = Boolean(session.quiz.videoUrl && session.quiz.videoUrl.trim());
+      setCurrentPart(hasVid ? 'video' : 'questions');
     }
 
     // 3. Update saved quizzes count
@@ -184,6 +190,7 @@ export default function App() {
     setAnswers({});
     setCurrentIndex(0);
     setShowResults(false);
+    setCurrentPart('video');
   };
 
   const handleRetakeMissed = () => {
@@ -203,6 +210,7 @@ export default function App() {
     setAnswers(updatedAnswers);
     setCurrentIndex(firstMissedIndex !== null ? firstMissedIndex : 0);
     setShowResults(false);
+    setCurrentPart('questions');
   };
 
   const handleApplyNewQuiz = (newQuiz: QuizSchema) => {
@@ -212,6 +220,8 @@ export default function App() {
     setAnswers({});
     setCurrentIndex(0);
     setShowResults(false);
+    const hasVid = Boolean(randomized.videoUrl && randomized.videoUrl.trim());
+    setCurrentPart(hasVid ? 'video' : 'questions');
 
     // Save to local library
     saveQuizToLibrary(randomized);
@@ -233,6 +243,9 @@ export default function App() {
         onClearQuiz={handleClearQuiz}
         hasQuiz={hasQuiz}
         savedQuizzesCount={savedCount}
+        currentPart={currentPart}
+        onSelectPart={(p) => setCurrentPart(p)}
+        hasVideo={Boolean(currentQuiz?.videoUrl)}
       />
 
       {/* Share Toast */}
@@ -261,9 +274,14 @@ export default function App() {
               answers={answers}
               onRestart={handleResetAnswers}
               onRetakeMissed={handleRetakeMissed}
+              onWatchVideo={() => {
+                setShowResults(false);
+                setCurrentPart('video');
+              }}
               onGoToQuestion={(idx) => {
                 setCurrentIndex(idx);
                 setShowResults(false);
+                setCurrentPart('questions');
               }}
               onOpenShare={() => setIsShareModalOpen(true)}
             />
@@ -272,42 +290,69 @@ export default function App() {
           /* RESPONSIVE QUIZ CONTAINER: Full width on mobile, centered card on tablet & desktop */
           <div className="w-full max-w-2xl lg:max-w-3xl bg-white sm:rounded-3xl sm:border sm:border-slate-200/90 sm:shadow-xs flex flex-col min-h-[calc(100vh-53px)] sm:min-h-[580px] p-3.5 sm:p-8 lg:p-10 transition-all overflow-hidden">
             
-            {/* Top Bar with Segmented dashes & score badges */}
-            <QuizTopBar
-              currentIndex={currentIndex}
-              totalQuestions={totalQuestions}
-              answers={answers}
-              onEditQuestions={() => setIsJsonModalOpen(true)}
-              onShare={() => setIsShareModalOpen(true)}
-              onSelectIndex={(idx) => setCurrentIndex(idx)}
-            />
-
-            {/* Dynamic Question Renderer with Text-to-Speech Pronunciation */}
-            {currentQuestion && (
-              <div className="flex-1 mt-3 sm:mt-4">
-                <QuestionCard
-                  key={`${currentIndex}-${currentQuestion.id || currentIndex}`}
-                  question={currentQuestion}
-                  questionIndex={currentIndex}
-                  answerState={currentAnswerState}
-                  onAnswer={handleAnswer}
-                  showExplanation={true}
+            {currentPart === 'video' && currentQuiz ? (
+              /* PARTE 1: VÍDEO DO YOUTUBE */
+              <VideoPlayerPart
+                videoUrl={currentQuiz.videoUrl}
+                videoTitle={currentQuiz.videoTitle}
+                videoDescription={currentQuiz.videoDescription}
+                quizTitle={currentQuiz.title}
+                questionCount={totalQuestions}
+                onProceedToQuestions={() => setCurrentPart('questions')}
+                onUpdateVideoUrl={(newUrl) => {
+                  if (!currentQuiz) return;
+                  const updated: QuizSchema = { 
+                    ...currentQuiz, 
+                    videoUrl: newUrl, 
+                    questions: currentQuiz.questions || [] 
+                  };
+                  setCurrentQuiz(updated);
+                  saveQuizToLibrary(updated);
+                }}
+              />
+            ) : (
+              /* PARTE 2: QUESTÕES NORMAIS */
+              <>
+                {/* Top Bar with Segmented dashes & score badges */}
+                <QuizTopBar
+                  currentIndex={currentIndex}
+                  totalQuestions={totalQuestions}
+                  answers={answers}
+                  hasVideo={Boolean(currentQuiz?.videoUrl)}
+                  onSwitchToVideo={() => setCurrentPart('video')}
+                  onEditQuestions={() => setIsJsonModalOpen(true)}
+                  onShare={() => setIsShareModalOpen(true)}
+                  onSelectIndex={(idx) => setCurrentIndex(idx)}
                 />
-              </div>
-            )}
 
-            {/* Bottom Navigation with Voltar and Avançar buttons */}
-            <QuizBottomNav
-              currentIndex={currentIndex}
-              totalQuestions={totalQuestions}
-              canGoBack={currentIndex > 0}
-              canGoForward={currentIndex < totalQuestions - 1}
-              onPrev={handlePrev}
-              onNext={handleNext}
-              onFinish={finishQuiz}
-              isLastQuestion={currentIndex === totalQuestions - 1}
-              hasAnsweredCurrent={Boolean(currentAnswerState?.answered)}
-            />
+                {/* Dynamic Question Renderer with Text-to-Speech Pronunciation */}
+                {currentQuestion && (
+                  <div className="flex-1 mt-3 sm:mt-4">
+                    <QuestionCard
+                      key={`${currentIndex}-${currentQuestion.id || currentIndex}`}
+                      question={currentQuestion}
+                      questionIndex={currentIndex}
+                      answerState={currentAnswerState}
+                      onAnswer={handleAnswer}
+                      showExplanation={true}
+                    />
+                  </div>
+                )}
+
+                {/* Bottom Navigation with Voltar and Avançar buttons */}
+                <QuizBottomNav
+                  currentIndex={currentIndex}
+                  totalQuestions={totalQuestions}
+                  canGoBack={currentIndex > 0}
+                  canGoForward={currentIndex < totalQuestions - 1}
+                  onPrev={handlePrev}
+                  onNext={handleNext}
+                  onFinish={finishQuiz}
+                  isLastQuestion={currentIndex === totalQuestions - 1}
+                  hasAnsweredCurrent={Boolean(currentAnswerState?.answered)}
+                />
+              </>
+            )}
 
           </div>
         )}

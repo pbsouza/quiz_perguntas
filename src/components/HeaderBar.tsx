@@ -8,8 +8,11 @@ import {
   Share2, 
   ChevronDown, 
   Layers,
-  MoreVertical
+  MoreVertical,
+  Video,
+  HelpCircle
 } from 'lucide-react';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderBarProps {
   onOpenJsonEditor: () => void;
@@ -22,6 +25,9 @@ interface HeaderBarProps {
   onClearQuiz: () => void;
   hasQuiz: boolean;
   savedQuizzesCount: number;
+  currentPart?: 'video' | 'questions';
+  onSelectPart?: (part: 'video' | 'questions') => void;
+  hasVideo?: boolean;
 }
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({
@@ -35,6 +41,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   onClearQuiz,
   hasQuiz,
   savedQuizzesCount,
+  currentPart = 'questions',
+  onSelectPart,
+  hasVideo,
 }) => {
   const [isShuffleMenuOpen, setIsShuffleMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
@@ -64,13 +73,48 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           <span className="text-base sm:text-lg font-bold tracking-tight text-slate-900 select-none truncate">
             QuizSchema
           </span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium hidden lg:inline whitespace-nowrap">
+          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 font-medium hidden xl:inline whitespace-nowrap">
             Questionários
           </span>
         </div>
 
+        {/* Two-Part Switcher (Parte 1: Vídeo | Parte 2: Perguntas) */}
+        {hasQuiz && hasVideo && onSelectPart && (
+          <div className="flex items-center p-0.5 bg-slate-100/90 rounded-xl border border-slate-200/90 text-xs shrink-0">
+            <button
+              type="button"
+              onClick={() => onSelectPart('video')}
+              className={`px-2 sm:px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                currentPart === 'video'
+                  ? 'bg-white text-indigo-700 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Video className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="hidden sm:inline">1. Vídeo</span>
+              <span className="sm:hidden">Vídeo</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelectPart('questions')}
+              className={`px-2 sm:px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                currentPart === 'questions'
+                  ? 'bg-white text-slate-900 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-slate-600" />
+              <span className="hidden sm:inline">2. Perguntas</span>
+              <span className="sm:hidden">Questões</span>
+            </button>
+          </div>
+        )}
+
         {/* Action Controls */}
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+
+          {/* PWA Install Button */}
+          <PWAInstallButton variant="header" />
 
           {/* Library / Meus Quizzes button */}
           <button
@@ -207,6 +251,11 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
                 {isMoreMenuOpen && (
                   <div className="absolute right-0 mt-1.5 w-44 bg-white rounded-2xl shadow-xl border border-slate-200 py-1.5 z-50 text-xs animate-in fade-in duration-100">
+                    <PWAInstallButton 
+                      variant="menu-item" 
+                      onInstalledSuccess={() => setIsMoreMenuOpen(false)} 
+                    />
+
                     {onOpenShare && (
                       <button
                         type="button"

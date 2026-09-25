@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { QuizSchema, QuestionAnswerState } from '../types/quiz';
-import { RotateCcw, CheckCircle2, XCircle, AlertCircle, ArrowLeft, Share2, Award, Download, Copy, Check } from 'lucide-react';
+import { RotateCcw, CheckCircle2, XCircle, AlertCircle, ArrowLeft, Share2, Award, Download, Copy, Check, Video } from 'lucide-react';
 import { cleanText } from '../utils/quizParser';
 
 interface ResultsScreenProps {
@@ -10,6 +10,7 @@ interface ResultsScreenProps {
   onRetakeMissed: () => void;
   onGoToQuestion: (index: number) => void;
   onOpenShare?: () => void;
+  onWatchVideo?: () => void;
 }
 
 export const ResultsScreen: React.FC<ResultsScreenProps> = ({
@@ -19,6 +20,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
   onRetakeMissed,
   onGoToQuestion,
   onOpenShare,
+  onWatchVideo,
 }) => {
   const total = quiz.questions.length;
   let correct = 0;
@@ -104,6 +106,16 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-3">
+          {quiz.videoUrl && onWatchVideo && (
+            <button
+              onClick={onWatchVideo}
+              className="px-5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-sm font-semibold rounded-full flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 border border-indigo-200"
+            >
+              <Video className="w-4 h-4 text-indigo-600" />
+              Rever Vídeo da Aula
+            </button>
+          )}
+
           <button
             onClick={onRestart}
             className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-full flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { QuizSchema, Question, QuestionType } from '../types/quiz';
 import { normalizeQuizJson } from '../utils/quizParser';
 import { PRESETS } from '../data/defaultQuizzes';
-import { Code, PlusCircle, Check, Copy, Download, Upload, AlertCircle, FileText, Sparkles, RefreshCw, X } from 'lucide-react';
+import { Code, PlusCircle, Check, Copy, Download, Upload, AlertCircle, FileText, Sparkles, RefreshCw, X, Video } from 'lucide-react';
 
 interface JsonEditorModalProps {
   isOpen: boolean;
@@ -114,6 +114,28 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
     a.download = `quiz_${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const getVideoUrlFromJson = (): string => {
+    try {
+      const parsed = JSON.parse(jsonText);
+      return parsed.videoUrl || parsed.video || parsed.youtube || parsed.parte1?.video || '';
+    } catch {
+      return '';
+    }
+  };
+
+  const handleUpdateVideoUrl = (newUrl: string) => {
+    try {
+      let parsed = JSON.parse(jsonText);
+      if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+        parsed = { questions: Array.isArray(parsed) ? parsed : [] };
+      }
+      parsed.videoUrl = newUrl.trim();
+      setJsonText(JSON.stringify(parsed, null, 2));
+    } catch {
+      // ignore if invalid json
+    }
   };
 
   // Add question via Visual Builder into jsonText
@@ -269,8 +291,23 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
           {/* TAB 1: JSON TEXTAREA */}
           {activeTab === 'editor' && (
             <div className="flex flex-col h-full gap-3">
+              {/* Quick YouTube link input */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-2.5 bg-indigo-50/80 border border-indigo-100 rounded-xl text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-indigo-950 shrink-0">
+                  <Video className="w-4 h-4 text-indigo-600" />
+                  <span>Parte 1 (Vídeo do YouTube):</span>
+                </div>
+                <input
+                  type="text"
+                  value={getVideoUrlFromJson()}
+                  onChange={(e) => handleUpdateVideoUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/watch?v=... (ou edite dentro do JSON abaixo)"
+                  className="flex-1 px-3 py-1.5 text-xs bg-white border border-indigo-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-slate-800"
+                />
+              </div>
+
               <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>Edite ou cole o texto com as perguntas abaixo:</span>
+                <span>Parte 2: Edite o texto das perguntas abaixo:</span>
                 <div className="flex items-center gap-2">
                   <label className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg cursor-pointer transition-colors shadow-2xs font-medium">
                     <Upload className="w-3.5 h-3.5" />
@@ -471,17 +508,24 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
           {activeTab === 'docs' && (
             <div className="bg-white rounded-2xl p-6 border border-slate-200 text-slate-800 space-y-4 max-w-2xl mx-auto text-sm leading-relaxed">
               <h3 className="text-base font-bold text-slate-900">
-                Esquema Suportado pelo Renderizador
+                Esquema em 2 Partes (Vídeo + Perguntas)
               </h3>
               <p>
-                O sistema é totalmente dinâmico e flexível. Ele aceita tanto o formato simples fornecido pelo usuário quanto formatos estendidos com múltiplos tipos de entrada.
+                O sistema é estruturado em duas etapas interligadas: a <strong>Parte 1 (Vídeo do YouTube)</strong> para estudo prévio e a <strong>Parte 2 (Perguntas)</strong> para fixação do conteúdo.
               </p>
 
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 font-mono text-xs overflow-x-auto">
 {`{
-  "title": "Título opcional",
+  "title": "Estudo Bíblico ou Aula",
+  "description": "Descrição opcional da atividade",
+  
+  // PARTE 1: VÍDEO DO YOUTUBE
+  "videoUrl": "https://www.youtube.com/watch?v=k1t64lF4-s0",
+  "videoTitle": "Vídeo da Aula",
+
+  // PARTE 2: QUESTÕES DO QUESTIONÁRIO
   "questions": [
-    // 1. Múltipla Escolha (Padrão do print)
+    // 1. Múltipla Escolha
     {
       "question": "Enunciado da pergunta",
       "options": ["Opção A", "Opção B", "Opção C", "Opção D"],
@@ -515,7 +559,7 @@ export const JsonEditorModal: React.FC<JsonEditorModalProps> = ({
               </div>
 
               <div className="text-xs text-slate-600 space-y-1">
-                <p><strong>Nomes de chaves flexíveis:</strong> Também aceita <code>pergunta</code> em vez de <code>question</code>, <code>alternativas</code> em vez de <code>options</code>, e <code>explicacao</code> em vez de <code>explanation</code>.</p>
+                <p><strong>Formatos alternativos aceitos:</strong> Você também pode usar as chaves <code>{'parte1: { "video": "https://..." }'}</code> e <code>{'parte2: { "questions": [...] }'}</code>, ou <code>youtube</code> em vez de <code>videoUrl</code>.</p>
               </div>
             </div>
           )}

@@ -123,23 +123,80 @@ export function normalizeQuizJson(raw: any, shouldShuffle: boolean = false): Qui
   let rawQuestions: any[] = [];
   let title = "Questionário";
   let description = "";
+  let videoUrl: string | undefined = undefined;
+  let videoTitle: string | undefined = undefined;
+  let videoDescription: string | undefined = undefined;
 
   if (Array.isArray(raw)) {
-    rawQuestions = raw;
+    // Check if it's a 2-part array: [ { video: "..." }, { questions: [...] } ]
+    if (raw.length >= 2 && (raw[0]?.video || raw[0]?.videoUrl || raw[0]?.youtube || raw[0]?.parte1)) {
+      const part1 = raw[0].parte1 || raw[0];
+      videoUrl = part1.video || part1.videoUrl || part1.youtube || part1.link;
+      videoTitle = part1.title || part1.titulo;
+      videoDescription = part1.description || part1.descricao;
+
+      const part2 = raw[1].parte2 || raw[1];
+      if (Array.isArray(part2)) {
+        rawQuestions = part2;
+      } else if (Array.isArray(part2.questions)) {
+        rawQuestions = part2.questions;
+      } else if (Array.isArray(part2.questoes)) {
+        rawQuestions = part2.questoes;
+      } else if (Array.isArray(part2.perguntas)) {
+        rawQuestions = part2.perguntas;
+      } else {
+        rawQuestions = raw.slice(1);
+      }
+    } else {
+      rawQuestions = raw;
+    }
   } else if (typeof raw === 'object') {
     title = cleanText(raw.title || raw.titulo || raw.name || raw.nome || "Questionário");
     description = cleanText(raw.description || raw.descricao || "");
 
-    if (Array.isArray(raw.questions)) {
-      rawQuestions = raw.questions;
-    } else if (Array.isArray(raw.questoes)) {
-      rawQuestions = raw.questoes;
-    } else if (Array.isArray(raw.perguntas)) {
-      rawQuestions = raw.perguntas;
-    } else if (Array.isArray(raw.items)) {
-      rawQuestions = raw.items;
-    } else {
-      throw new Error("Não foi encontrada uma lista de perguntas no conteúdo.");
+    // Check Parte 1 (YouTube video)
+    const part1 = raw.parte1 || raw.parte_1 || raw.part1;
+    if (part1 && typeof part1 === 'object') {
+      videoUrl = part1.video || part1.videoUrl || part1.youtube || part1.youtubeUrl || part1.link;
+      videoTitle = part1.title || part1.titulo || raw.videoTitle || raw.video_title;
+      videoDescription = part1.description || part1.descricao;
+    } else if (typeof part1 === 'string') {
+      videoUrl = part1;
+    }
+
+    if (!videoUrl) {
+      videoUrl = raw.videoUrl || raw.video || raw.youtube || raw.youtubeUrl || raw.youtube_url || raw.video_url || raw.link;
+    }
+    if (!videoTitle) {
+      videoTitle = raw.videoTitle || raw.video_title;
+    }
+    if (!videoDescription) {
+      videoDescription = raw.videoDescription || raw.video_description;
+    }
+
+    // Check Parte 2 (Questions)
+    const part2 = raw.parte2 || raw.parte_2 || raw.part2;
+    if (Array.isArray(part2)) {
+      rawQuestions = part2;
+    } else if (part2 && typeof part2 === 'object') {
+      if (Array.isArray(part2.questions)) rawQuestions = part2.questions;
+      else if (Array.isArray(part2.questoes)) rawQuestions = part2.questoes;
+      else if (Array.isArray(part2.perguntas)) rawQuestions = part2.perguntas;
+      else if (Array.isArray(part2.items)) rawQuestions = part2.items;
+    }
+
+    if (rawQuestions.length === 0) {
+      if (Array.isArray(raw.questions)) {
+        rawQuestions = raw.questions;
+      } else if (Array.isArray(raw.questoes)) {
+        rawQuestions = raw.questoes;
+      } else if (Array.isArray(raw.perguntas)) {
+        rawQuestions = raw.perguntas;
+      } else if (Array.isArray(raw.items)) {
+        rawQuestions = raw.items;
+      } else {
+        throw new Error("Não foi encontrada uma lista de perguntas no conteúdo.");
+      }
     }
   } else {
     throw new Error("Formato não reconhecido. Certifique-se de colar uma lista de perguntas.");
@@ -248,6 +305,9 @@ export function normalizeQuizJson(raw: any, shouldShuffle: boolean = false): Qui
   return {
     title,
     description,
+    videoUrl: videoUrl ? String(videoUrl).trim() : undefined,
+    videoTitle: videoTitle ? cleanText(videoTitle) : undefined,
+    videoDescription: videoDescription ? cleanText(videoDescription) : undefined,
     questions: finalQuestions
   };
 }
