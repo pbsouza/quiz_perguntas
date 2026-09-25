@@ -25,6 +25,7 @@ import { SavedQuizzesModal } from './components/SavedQuizzesModal';
 import { ShareModal } from './components/ShareModal';
 import { EmptyState } from './components/EmptyState';
 import { VideoPlayerPart } from './components/VideoPlayerPart';
+import { wakeLockManager } from './utils/wakeLock';
 
 export default function App() {
   const [currentQuiz, setCurrentQuiz] = useState<QuizSchema | null>(null);
@@ -83,6 +84,13 @@ export default function App() {
       saveActiveSession(currentQuiz, currentIndex, answers);
     }
   }, [currentQuiz, currentIndex, answers]);
+
+  // Ensure screen lock functions normally during questions, results or empty state
+  useEffect(() => {
+    if (currentPart === 'questions' || showResults || !currentQuiz) {
+      wakeLockManager.release();
+    }
+  }, [currentPart, showResults, currentQuiz]);
 
   const hasQuiz = Boolean(currentQuiz && currentQuiz.questions && currentQuiz.questions.length > 0);
   const totalQuestions = currentQuiz?.questions?.length || 0;

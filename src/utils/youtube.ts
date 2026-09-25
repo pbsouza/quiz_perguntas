@@ -2,6 +2,13 @@
  * Utility functions for YouTube URL parsing and embed generation
  */
 
+declare global {
+  interface Window {
+    YT?: any;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
 export interface YouTubeInfo {
   videoId: string;
   embedUrl: string;
@@ -69,6 +76,10 @@ export function extractYouTubeInfo(url: string | undefined | null): YouTubeInfo 
   const queryParams = new URLSearchParams();
   queryParams.set('rel', '0');
   queryParams.set('modestbranding', '1');
+  queryParams.set('enablejsapi', '1');
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    queryParams.set('origin', window.location.origin);
+  }
   if (startTime) {
     queryParams.set('start', String(startTime));
   }
